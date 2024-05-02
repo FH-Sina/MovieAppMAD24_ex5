@@ -2,6 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+<<<<<<< HEAD
+=======
+    <uses-permission android:name="android.permission.INTERNET" />
+
+>>>>>>> origin/exercise-05-starter
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -15,7 +20,10 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+<<<<<<< HEAD
             android:label="@string/app_name"
+=======
+>>>>>>> origin/exercise-05-starter
             android:theme="@style/Theme.MovieAppMAD24">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
