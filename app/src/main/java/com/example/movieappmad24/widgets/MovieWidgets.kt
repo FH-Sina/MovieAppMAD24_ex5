@@ -157,7 +157,7 @@ fun FavoriteIcon(
             modifier = Modifier.clickable {
                 onFavoriteClick()
                 Log.i("MovieWidget", "icon clicked")
-                                          },
+            },
             tint = MaterialTheme.colorScheme.secondary,
             imageVector =
             if (isFavorite) {

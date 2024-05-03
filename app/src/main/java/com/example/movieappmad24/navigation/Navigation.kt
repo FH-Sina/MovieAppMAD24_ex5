@@ -33,7 +33,7 @@ fun Navigation() {
                 navController = navController,
                 movieId = backStackEntry.arguments?.getString(DETAIL_ARGUMENT_KEY),
                 moviesViewModel = moviesViewModel
-                )
+            )
         }
 
         composable(route = Screen.WatchlistScreen.route){

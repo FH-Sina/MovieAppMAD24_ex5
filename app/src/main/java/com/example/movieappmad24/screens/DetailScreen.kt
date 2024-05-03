@@ -61,7 +61,7 @@ fun DetailScreen(
                     modifier = Modifier.padding(innerPadding),
                     movie = movie,
                     onFavoriteClick = { id -> moviesViewModel.toggleFavoriteMovie(id) }
-                    )
+                )
 
                 Divider(modifier = Modifier.padding(4.dp))
 
