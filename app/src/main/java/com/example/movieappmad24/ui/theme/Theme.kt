@@ -16,17 +16,6 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-<<<<<<< HEAD
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-=======
     primary = Indigo500,
     secondary = Pink200,
     tertiary = Indigo100
@@ -36,7 +25,6 @@ private val LightColorScheme = lightColorScheme(
     primary = Indigo500,
     secondary = Pink200,
     tertiary = Indigo100
->>>>>>> origin/exercise-05-starter
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
