@@ -13,10 +13,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -27,112 +26,89 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
-import androidx.navigation.NavController
-import com.example.movieappmad24.viewmodels.MoviesViewModel
+import androidx.navigation.NavHostController
+import com.example.movieappmad24.com.example.movieappmad24.viewmodels.ViewModelDetail
 import com.example.movieappmad24.widgets.HorizontalScrollableImageView
 import com.example.movieappmad24.widgets.MovieRow
 import com.example.movieappmad24.widgets.SimpleTopAppBar
 
 @Composable
 fun DetailScreen(
+    navController: NavHostController,
     movieId: String?,
-    navController: NavController,
-    moviesViewModel: MoviesViewModel
+    viewModelDetail: ViewModelDetail
 ) {
-
-    movieId?.let {
-        val movie = moviesViewModel.movies.filter { movie -> movie.id == movieId }[0]
-
-
-        Scaffold (
-            topBar = {
-                SimpleTopAppBar(title = movie.title) {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Go back"
-                        )
+    movieId?.let { id ->
+        viewModelDetail.getMovieById(id)
+        val movieState by viewModelDetail.movie.collectAsState()
+        movieState?.let { movieWithImage ->
+            Scaffold(
+                topBar = {
+                    SimpleTopAppBar(title = movieWithImage.movie.title) {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(
+                                imageVector = Icons.Filled.ArrowBack,
+                                contentDescription = "Go back"
+                            )
+                        }
                     }
                 }
-            }
-        ){ innerPadding ->
-            Column {
-                MovieRow(
-                    modifier = Modifier.padding(innerPadding),
-                    movie = movie,
-                    onFavoriteClick = { id -> moviesViewModel.toggleFavoriteMovie(id) }
-                )
+            ) { innerPadding ->
+                Column(modifier = Modifier.padding(innerPadding)) {
+                    MovieRow(
+                        movieWithImages = movieWithImage,
+                        onFavoriteClick = { viewModelDetail.updateFavorite(movieWithImage.movie) }
+                    )
 
-                Divider(modifier = Modifier.padding(4.dp))
+                    Divider(modifier = Modifier.padding(4.dp))
 
-                Column {
-                    Text("Movie Trailer")
-                    VideoPlayer(trailerURL = movie.trailer)
+                    Text("Movie Trailer", modifier = Modifier.padding(horizontal = 16.dp))
+                    movieWithImage.movie.trailer?.let { trailerURL ->
+                        VideoPlayer(trailerURL = trailerURL)
+                    }
+
+                    Divider(modifier = Modifier.padding(4.dp))
+
+                    HorizontalScrollableImageView(movieWithImages = movieWithImage)
                 }
-
-                Divider(modifier = Modifier.padding(4.dp))
-
-                HorizontalScrollableImageView(movie = movie)
             }
         }
     }
 }
 
 @Composable
-fun VideoPlayer(trailerURL: String){
-
-    var lifecycle by remember {
-        mutableStateOf(Lifecycle.Event.ON_CREATE)
-    }
-
+fun VideoPlayer(trailerURL: String) {
     val context = LocalContext.current
-
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
-            setMediaItem(MediaItem.fromUri(
-                "android.resource://${context.packageName}/${context.resources.getIdentifier(trailerURL, "raw", context.packageName)}"
-            ))
+            setMediaItem(MediaItem.fromUri(trailerURL))
             prepare()
             playWhenReady = true
         }
     }
 
     val lifecycleOwner = LocalLifecycleOwner.current
-
-    DisposableEffect(key1 = lifecycleOwner) {
+    DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            lifecycle = event
+            when(event) {
+                Lifecycle.Event.ON_RESUME -> exoPlayer.play()
+                Lifecycle.Event.ON_PAUSE -> exoPlayer.pause()
+                else -> Unit
+            }
         }
 
         lifecycleOwner.lifecycle.addObserver(observer)
-
         onDispose {
             exoPlayer.release()
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
+
     AndroidView(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(16 / 9f),
-        factory = {
-            PlayerView(context).also { playerView ->
-                playerView.player = exoPlayer
-            }
-        },
-        update = {
-            when(lifecycle) {
-                Lifecycle.Event.ON_RESUME -> {
-                    it.onResume()
-                    //it.player?.play()
-                }
-                Lifecycle.Event.ON_PAUSE -> {
-                    it.onPause()
-                    it.player?.pause()
-                }
-                else -> Unit
-            }
-        }
+        factory = { PlayerView(context).apply { player = exoPlayer } },
+        update = { it.onResume() }
     )
-
 }

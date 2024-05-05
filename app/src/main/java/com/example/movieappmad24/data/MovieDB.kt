@@ -1,0 +1,47 @@
+package com.example.movieappmad24.com.example.movieappmad24.data
+
+import androidx.room.Database
+import android.content.Context
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
+import com.example.movieappmad24.com.example.movieappmad24.models.MovieImage
+import com.example.movieappmad24.com.example.movieappmad24.functions.DatabaseRepositoryManager
+import com.example.movieappmad24.models.Movie
+
+@Database(entities = [Movie::class, MovieImage::class], version = 4, exportSchema = false)
+abstract class MovieDB : RoomDatabase() {
+    abstract fun movieDao(): MovieDao
+
+    companion object {
+        @Volatile
+        private var instance: MovieDB? = null
+
+        fun getDatabase(context: Context): MovieDB {
+            val tempInstance = instance
+            if (tempInstance != null) {
+                return tempInstance
+            }
+            synchronized(this) {
+                val newInstance = instance ?: buildDatabase(context).also { instance = it }
+                return newInstance
+            }
+        }
+
+        private fun buildDatabase(context: Context): MovieDB {
+            return Room.databaseBuilder(context.applicationContext, MovieDB::class.java, "movie_db")
+                .fallbackToDestructiveMigration()
+                .addCallback(seedDatabase(context))
+                .build()
+        }
+
+        private fun seedDatabase(context: Context): Callback {
+            return object : Callback() {
+                override fun onCreate(db: SupportSQLiteDatabase) {
+                    super.onCreate(db)
+                    DatabaseRepositoryManager(context).seedDatabase()
+                }
+            }
+        }
+    }
+}

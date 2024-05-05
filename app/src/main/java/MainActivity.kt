@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import com.example.movieappmad24.navigation.Navigation
 import com.example.movieappmad24.ui.theme.MovieAppMAD24Theme
 
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
